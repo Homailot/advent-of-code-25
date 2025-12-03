@@ -2,5 +2,5 @@
 
 using advent_of_code_25.Puzzles;
 
-var puzzle = new Puzzle2();
+var puzzle = new Puzzle3();
 puzzle.Solution();

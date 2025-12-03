@@ -166,6 +166,9 @@ public class Puzzle2 : IPuzzle
     public void Solution()
     {
         var ranges = GetIDsFromInput();
+        Timer.TimeOperations(() => SumInvalidIDs(ranges));
+        Timer.TimeOperations(() => SumInvalidIDsAtLeastTwo(ranges));
+        
         Console.WriteLine(SumInvalidIDs(ranges));
         Console.WriteLine(SumInvalidIDsAtLeastTwo(ranges));
     }

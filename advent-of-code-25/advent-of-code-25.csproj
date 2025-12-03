@@ -27,6 +27,12 @@
       <None Update="InputFiles\input-1">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="InputFiles\input-1-test">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="InputFiles\input-2-test">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="InputFiles\input-2">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>

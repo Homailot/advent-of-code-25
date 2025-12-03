@@ -77,12 +77,8 @@ public class Puzzle3: IPuzzle
                 } 
             }
 
-            var value = 0L;
-            foreach (var digit in digits)
-            {
-                value = value * 10L + digit;
-            }
-            
+            var value = digits.Aggregate(0L, (current, digit) => current * 10L + digit);
+
             sum += value;
         }
 

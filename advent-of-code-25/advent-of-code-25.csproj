@@ -9,21 +9,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <EmbeddedResource Update="Input.resx">
-        <Generator>ResXFileCodeGenerator</Generator>
-        <LastGenOutput>InputFiles.Designer.cs</LastGenOutput>
-      </EmbeddedResource>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Update="Input.Designer.cs">
-        <DesignTime>True</DesignTime>
-        <AutoGen>True</AutoGen>
-        <DependentUpon>Input.resx</DependentUpon>
-      </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
       <None Update="InputFiles\input-1">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>

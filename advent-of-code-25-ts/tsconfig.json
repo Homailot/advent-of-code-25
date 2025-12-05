@@ -1,11 +1,6 @@
 {
     "compilerOptions": {
         "noEmit": true,
-        "paths": {
-            "@/*": [
-                "./src/*"
-            ]
-        },
         "target": "esnext",
         "lib": [
             "ESNext"
@@ -25,7 +20,7 @@
         "noFallthroughCasesInSwitch": true
     },
     "include": [
-        "./src",
-        ".prettierrc"
+        "./src/**/*.ts",
+        "./src/**/*.d.ts"
     ]
 }

@@ -1,8 +1,8 @@
 import js from "@eslint/js";
-import globals from "globals";
 import importPlugin from "eslint-plugin-import";
-import tseslint from "typescript-eslint";
 import { defineConfig } from "eslint/config";
+import globals from "globals";
+import tseslint from "typescript-eslint";
 
 export default defineConfig(
   { ignores: ["dist", "node_modules/**"] },
@@ -19,10 +19,10 @@ export default defineConfig(
       sourceType: "module",
       globals: {
         ...globals.node,
-        ...globals.es2025
+        ...globals.es2025,
       },
       parserOptions: {
-       project: "./tsconfig.json",
+        project: "./tsconfig.json",
       },
     },
     plugins: {

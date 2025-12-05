@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+        "noEmit": true,
+        "paths": {
+            "@/*": [
+                "./src/*"
+            ]
+        },
+        "target": "esnext",
+        "lib": [
+            "ESNext"
+        ],
+        "module": "nodenext",
+        "rewriteRelativeImportExtensions": true,
+        "allowArbitraryExtensions": true,
+        "declaration": true,
+        "declarationMap": true,
+        "erasableSyntaxOnly": true,
+        "verbatimModuleSyntax": true,
+        /* Linting */
+        "strict": true,
+        "strictNullChecks": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true
+    },
+    "include": [
+        "./src",
+        ".prettierrc"
+    ]
+}

@@ -1,3 +1,3 @@
-import Puzzle5 from "./puzzles/puzzle5.ts";
+import Puzzle6 from "./puzzles/puzzle6.ts";
 
-void Puzzle5();
+void Puzzle6();

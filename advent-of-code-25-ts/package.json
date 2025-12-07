@@ -7,7 +7,7 @@
   "type": "module",
   "main": "main.ts",
   "scripts": {
-    "dev": "node src/main.ts"
+    "start": "node src/main.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

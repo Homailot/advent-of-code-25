@@ -33,6 +33,12 @@
       <None Update="InputFiles\input-4">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="InputFiles\input-8-test">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="InputFiles\input-8">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

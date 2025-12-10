@@ -1,5 +1,3 @@
-using System.Numerics;
-
 namespace advent_of_code_25.Puzzles;
 
 public class Puzzle8 : IPuzzle
@@ -28,8 +26,6 @@ public class Puzzle8 : IPuzzle
     private static Circuits ConnectCircuitsUntilSingle(List<JunctionBox> boxes, long limit = 1000)
     {
         var sortedPairs = new PriorityQueue<(JunctionBox, JunctionBox), double>();
-        var circuits = boxes.Select(box => new HashSet<JunctionBox> {box}).ToList();
-        
         for (var i = 0; i < boxes.Count; i++)
         {
             for (var j = i + 1; j < boxes.Count; j++)
@@ -41,6 +37,7 @@ public class Puzzle8 : IPuzzle
             }
         }
 
+        var circuits = boxes.Select(box => new HashSet<JunctionBox> {box}).ToList();
         (JunctionBox, JunctionBox)? last = null;
         for (var i = 0; i < limit && sortedPairs.Count > 0 && circuits.Count > 1; i++)
         {
@@ -79,7 +76,6 @@ public class Puzzle8 : IPuzzle
     public void Solution()
     {
         var boxes = GetJunctionBoxes();
-        Console.WriteLine(boxes);
         Console.WriteLine(GetCircuitSizes(boxes));
         Console.WriteLine(GetLastPairDistance(boxes));
     }

@@ -5,11 +5,13 @@ namespace advent_of_code_25.Puzzles;
 public class Puzzle9 : IPuzzle
 {
     private record Tile(int X, int Y);
-    private record Vector(short X, short Y);
+
+    private record Edge(int At, int From, int To);
+    private record SortedEdges(List<Edge> HorizontalEdges, List<Edge> VerticalEdges);
 
     private static List<Tile> GetTiles()
     {
-        const string path = @"InputFiles/input-9-test-3";
+        const string path = @"InputFiles/input-9";
 
         return File.ReadLines(path)
             .Select(line => line.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList())
@@ -27,175 +29,169 @@ public class Puzzle9 : IPuzzle
 
     private static long GetLargestArea(List<Tile> tiles)
     {
-        var comparer = Comparer<long>.Create((x, y) => y.CompareTo(x));
-        var sortedPairs = new PriorityQueue<(Tile, Tile), long>(comparer);
+        var maxArea = long.MinValue;
+        
         for (var i = 0; i < tiles.Count; i++)
         {
             for (var j = i + 1; j < tiles.Count; j++)
             {
                 var left = tiles[i];
                 var right = tiles[j];
-                
-                sortedPairs.Enqueue((left, right), GetArea(left, right));
+
+                var area = GetArea(left, right);
+                if (area > maxArea)
+                {
+                    maxArea = area;
+                }
             }
         }
 
-        sortedPairs.TryDequeue(out var element, out var priority);
-        Console.WriteLine(element);
-        return priority;
+        return maxArea;
     }
 
-    private static int Modulo(int a, int b)
+    private static (int From, int To) GetMinMax(int left, int right)
     {
-        var result = a % b;
-        return result < 0 ? result + b : result;
+        return left > right ? (right, left) : (left, right);
     }
 
-    // not mathematically correct, but works since adjacent tiles are connected by straight lines
-    private static Vector GetUnitVector(Tile from, Tile to)
+    private static (int From, int To) GetIntersection((int From, int To) limit, (int From, int To) edge)
     {
-        var horizontal = to.X - from.X;
-        if (horizontal != 0)
+        if (edge.From > limit.To || edge.To < limit.From)
         {
-            return new Vector((short)(horizontal / Math.Abs(horizontal)), 0);
+            return (-1, -1);
+        }
+
+        return (Math.Max(edge.From, limit.From), Math.Min(edge.To, limit.To));
+    }
+    
+    private static SortedEdges GetSortedEdges(List<Tile> tiles)
+    {
+        List<Edge> horizontalEdges = [];
+        List<Edge> verticalEdges = [];
+
+        var (lastX, lastY) = tiles[^1];
+        foreach (var (x, y) in tiles)
+        {
+            if (lastX == x)
+            {
+                var (from, to) = GetMinMax(lastY, y);
+                verticalEdges.Add(
+                    new Edge(
+                        x,
+                        from, 
+                        to
+                    ));
+            }
+            else
+            {
+                var (from, to) = GetMinMax(lastX, x);
+                horizontalEdges.Add(
+                    new Edge(
+                        y,
+                        from,
+                        to
+                    ));
+            }
+
+            (lastX, lastY) = (x, y);
         }
         
-        var vertical = to.Y - from.Y;
-        return vertical != 0 ? new Vector(0, (short)(vertical / Math.Abs(vertical))) : new Vector(0, 0);
+        verticalEdges.Sort((left, right) => left.At.CompareTo(right.At));
+        horizontalEdges.Sort((left, right) => left.At.CompareTo(right.At));
+        return new SortedEdges(horizontalEdges, verticalEdges);
     }
 
-    // > 0: +90º; < 0: -90º; = 0: -180º or 180º
-    private static int CalculateAngleSign(Vector first, Vector second)
+    private static void PrintArray(ref BitArray array)
     {
-        return -first.X * second.Y + first.Y * second.X;
+        foreach (var bit in array)
+        {
+            Console.Write(bit.Equals(true) ? 1 : 0); 
+        }
+        Console.WriteLine();
+    }
+
+
+    private static bool CastShadow(ref Tile left, ref Tile right, (int From, int To) search, (int From, int To) bounds,
+        List<Edge> edges)
+    {
+        var accumulate = new BitArray(bounds.To - bounds.From + 1, false);
+                
+        var currentPosition = edges[0].At;
+        foreach (var edge in edges)
+        {
+            if (currentPosition != edge.At)
+            {
+                //Console.WriteLine($"Column for tile {left} to tile {right} at x = {currentPosition}");
+                //PrintArray(ref accumulate);
+                if (edge.At > search.From && !accumulate.HasAllSet())
+                {
+                   // Console.WriteLine("Rejected!");
+                    return false;
+                }
+
+                // this is not correct for areas of single lines, but those shouldn't be the largest areas
+                if (edge.At >= search.To)
+                {
+                    //Console.WriteLine("Is Valid!");
+                    return true;
+                }
+
+                currentPosition = edge.At;
+            }
+
+            var (from, to) = GetIntersection(bounds, (edge.From, edge.To));
+            //Console.WriteLine($"Intersect at {(from, to)}");
+            if (from == -1)
+            {
+                continue;
+            }
+
+            var edgeArray = new BitArray(to - from + 1, true);
+            edgeArray.Length = bounds.To - bounds.From + 1;
+            edgeArray.LeftShift(from - bounds.From);
+
+            accumulate.Xor(edgeArray);
+            accumulate.Set(from - bounds.From, true);
+            accumulate.Set(to - bounds.From, true);
+        }
+        //Console.WriteLine($"Vertical Column for tile {left} to tile {right} at x = {currentPosition}");
+        //PrintArray(ref accumulate);
+        //Console.WriteLine("Rejected!");
+        return false;
     } 
     
-    // > 0: angles are on the inside of the shape; < 0: angles are on the outside of the shape;
-    private static short GetShapeDirection(List<Tile> tiles)
-    {
-        var sum = 0;
-        // assuming tiles has at least three tiles
-        for (var i = 0; i < tiles.Count; i++)
-        {
-            var first = GetUnitVector(tiles[i], tiles[Modulo(i - 1, tiles.Count)]);
-            var second = GetUnitVector(tiles[i], tiles[Modulo(i + 1, tiles.Count)]);
-
-            sum += CalculateAngleSign(first, second);
-        }
-
-        return sum == 0 ? (short)0 : (short) (sum / Math.Abs(sum));
-    }
-
-    private static Dictionary<Tile, HashSet<Vector>> GetEdges(List<Tile> tiles)
-    {
-        var shapeDirection = GetShapeDirection(tiles);
-        var edges = new Dictionary<Tile, HashSet<Vector>>();
-
-        for (var i = 0; i < tiles.Count; i++)
-        {
-            var from = tiles[Modulo(i - 1, tiles.Count)];
-            var to = tiles[i];
-
-            var horizontal = to.X - from.X;
-            var vertical = to.Y - from.Y;
-
-            var horizontalUnit = horizontal == 0 ? (short) 0 : (short) (horizontal / Math.Abs(horizontal));
-            var verticalUnit = vertical == 0 ? (short) 0 : (short) (vertical / Math.Abs(vertical));
-
-            var forbiddenMovement = new Vector((short)(verticalUnit * shapeDirection),(short) (-horizontalUnit * shapeDirection));
-            
-            var increment = new Vector(horizontalUnit, verticalUnit);
-            var current = from;
-            while (true)
-            {
-                if (edges.TryGetValue(current, out var set))
-                {
-                    set.Add(forbiddenMovement);
-                }
-                else
-                {
-                    edges[current] = new HashSet<Vector>([forbiddenMovement]);
-                }
-
-                if (current == to)
-                {
-                    break;
-                }
-
-                current = new Tile(current.X + increment.X, current.Y + increment.Y);
-            }
-        }
-        
-        return edges;
-    }
-
-    private static List<BitArray> FillInterior(List<Tile> tiles)
-    {
-        var edges = GetEdges(tiles);
-        var startPosition = tiles[0];
-        var queue = new Queue<Tile>([startPosition]);
-        var visited = new HashSet<Tile>();
-        var maxX = (tiles.MaxBy(t => t.X)?.X + 1) ?? 0;
-        var maxY = tiles.MaxBy(t => t.Y)?.Y + 1 ?? 0;
-        var grid = new List<BitArray>();
-
-        for (int y = 0; y < maxY; y++)
-        {
-            grid.Add(new BitArray(maxX));
-        }
-
-        var c = 0;
-        while (queue.Count > 0)
-        {
-            if (c == 0)
-            {
-                Console.WriteLine(queue.Count);
-            }
-            c = Modulo(c + 1, 1000);
-            var tile = queue.Dequeue();
-            visited.Add(tile);
-            grid[tile.Y].Set(tile.X, true);
-
-            var movements = new HashSet<Vector>([
-                new Vector(-1, 0),
-                new Vector(1, 0),
-                new Vector(0, 1),
-                new Vector(0, -1)
-            ]);
-            
-            if (edges.TryGetValue(tile, out var forbiddenMovements))
-            {
-                movements.ExceptWith(forbiddenMovements);     
-            }
-
-            foreach (var movement in movements)
-            {
-                var newTile = new Tile(tile.X + movement.X, tile.Y + movement.Y);
-                if (!visited.Contains(newTile))
-                {
-                    queue.Enqueue(newTile);
-                }
-            } 
-        }
-
-        return grid;
-    }
     
     private static long GetLargestColoredArea(List<Tile> tiles)
     {
-        var grid = FillInterior(tiles);
+        var edges = GetSortedEdges(tiles);
+        var maxArea = long.MinValue;
 
-        using StreamWriter outputFile = new StreamWriter("OutputGrid.txt");
-        foreach (var array in grid)
+        for (var i = 0; i < tiles.Count; i++)
         {
-            foreach (var bit in array)
+            for (var j = i + 1; j < tiles.Count; j++)
             {
-                outputFile.Write((bool) bit? "#" : ".");
+                var left = tiles[i];
+                var right = tiles[j];
+
+                var minMaxY = GetMinMax(left.Y, right.Y);
+                var minMaxX = GetMinMax(left.X, right.X);
+
+                var verticalAccept = CastShadow(ref left, ref right, minMaxX, minMaxY, edges.VerticalEdges);
+                var horizontalAccept = CastShadow(ref left, ref right, minMaxY, minMaxX, edges.HorizontalEdges);
+
+                if (verticalAccept && horizontalAccept)
+                {
+                    var area = GetArea(left, right);
+
+                    if (area > maxArea)
+                    {
+                        maxArea = area;
+                    }
+                }
             }
-            outputFile.WriteLine();
         }
 
-        return 0;
+        return maxArea;
     }
 
     public void Solution()

@@ -51,6 +51,15 @@
       <None Update="InputFiles\input-9-test-3">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="InputFiles\input-9-test-4">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="InputFiles\input-9-test-5">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="InputFiles\input-9-test-6">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
